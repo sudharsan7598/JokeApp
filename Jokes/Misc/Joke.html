@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>My Joke Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin: 50px auto;
+            max-width: 800px;
+        }
+
+        .header {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+            border-radius: 10px 10px 0 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: rgba(0, 123, 255, 0.8);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: rgba(0, 123, 255, 1);
+            }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .highlight {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <div class="header">
+            <h1>My Joke Website</h1>
+        </div>
+
+        <div>
+            <button id="randomButton">Fetch a Random Joke</button>
+        </div>
+        <hr>
+        <div>
+            <input type="text" id="searchTerm" placeholder="Enter search term">
+            <button id="searchButton">Search Jokes</button>
+        </div>
+        <div id="jokeDisplay"></div>
+    </div>
+
+    <script>const randomButton = document.getElementById('randomButton');
+        const searchButton = document.getElementById('searchButton');
+        const searchTermInput = document.getElementById('searchTerm');
+        const jokeDisplay = document.getElementById('jokeDisplay');
+
+        randomButton.addEventListener('click', fetchRandomJoke);
+        searchButton.addEventListener('click', searchJokes);
+
+        async function fetchRandomJoke() {
+            jokeDisplay.innerHTML = 'Fetching a random joke...';
+            const response = await fetch('https://localhost:7262/FetchRandomJoke', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            jokeDisplay.innerHTML = `<p>${data}</p>`;
+        }
+
+        async function searchJokes() {
+            const searchTerm = searchTermInput.value.trim();
+            if (searchTerm === '') {
+                jokeDisplay.innerHTML = 'Please enter a search term.';
+                return;
+            }
+
+            jokeDisplay.innerHTML = 'Searching for jokes...';
+            const response = await fetch(`https://localhost:7262/SearchJoke/${searchTerm}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (data.length > 0) {
+                jokeDisplay.innerHTML = '<h3>Matching Jokes:</h3>';
+                const tableHtml = `
+                            <table>
+                                <tr>
+                                    <th>Joke</th>
+                                    <th>Category</th>
+                                </tr>
+                                ${data
+                        .map(
+                            result => `
+                                            <tr>
+                                                <td>${result.joke}</td>
+                                                <td>${result.category}</td>
+                                            </tr>
+                                        `
+                        )
+                        .join('')}
+                            </table>
+                        `;
+                jokeDisplay.innerHTML += tableHtml;
+            } else {
+                jokeDisplay.innerHTML = 'No matching jokes found.';
+            }
+        }</script>
+</body>
+</html>
